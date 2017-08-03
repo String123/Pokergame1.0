@@ -6,8 +6,8 @@ import java.awt.image.BufferedImage;
  *
  */
 public class Button {
-	int x, y;
-	int width, height;
+	private int x, y;
+	private int width, height;
 	BufferedImage image;
 
 	public Button(int x, int y, int width, int height) {
@@ -18,4 +18,20 @@ public class Button {
 		this.image = GameClient.button1;
 	}
 
+	public int getX() {
+		return x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+	
 }

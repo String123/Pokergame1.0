@@ -36,6 +36,7 @@ public class GameServer {
 			// 初始化每个房间
 			for (int i = 0; i < room.length; i++) {
 				room[i] = new Room();
+				// execut.execute(room[i]);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -46,8 +47,7 @@ public class GameServer {
 		Socket clientSockt = null;
 		while (true) {
 			try {
-				System.out.println(sdf.format(new Date()) + "本机IP地址为:"
-						+ ServerUtil.getLocalInetAddress());
+				System.out.println(sdf.format(new Date()) + "本机IP地址为:" + ServerUtil.getLocalInetAddress());
 				System.out.println(sdf.format(new Date()) + "本机端口号为:3000");
 				System.out.println(sdf.format(new Date()) + "等待客户端连接...");
 				clientSockt = serverSocket.accept();
@@ -85,16 +85,15 @@ public class GameServer {
 			int roomNum = -1, playerID = -1, toDoId = -1;
 			try {
 				clientIs = clientSocket.getInputStream();
-				clientIsr = new InputStreamReader(clientIs,"utf-8");
+				clientIsr = new InputStreamReader(clientIs, "utf-8");
 				clientBr = new BufferedReader(clientIsr);
 				clientOs = clientSocket.getOutputStream();
-				clientOsw = new OutputStreamWriter(clientOs,"utf-8");
+				clientOsw = new OutputStreamWriter(clientOs, "utf-8");
 				clientPw = new PrintWriter(clientOsw, true);
 
 				name = clientBr.readLine();
 				// 判断名字是否合法或者重复,传回客户端对应的信息
-				while (name == null || nameList.contains(name)
-						|| name.equals("")) {
+				while (name == null || nameList.contains(name) || name.equals("")) {
 					clientPw.println("N");
 					name = clientBr.readLine();
 				}
@@ -105,9 +104,7 @@ public class GameServer {
 					// 判断是加入房间还是创建新房间 该循环为大厅循环
 					while (true) {
 						joinOrNot = null;
-						while (joinOrNot == null
-								|| !(joinOrNot.equals("Y") || joinOrNot
-										.equals("N"))) {
+						while (joinOrNot == null || !(joinOrNot.equals("Y") || joinOrNot.equals("N"))) {
 							joinOrNot = clientBr.readLine();
 						}
 						if (joinOrNot.equals("Y")) {
@@ -117,28 +114,22 @@ public class GameServer {
 								continue;
 							}
 							roomNum = Integer.valueOf(tmpMsg) - 1;
-							if (room[roomNum].pNum == 0
-									|| room[roomNum].pNum > 2) {
+							if (room[roomNum].getpNum() == 0 || room[roomNum].getpNum() > 2) {
 								clientPw.println("ERROR");
 								continue;
 							}
 							clientPw.println("RIGHT");
-							playerID = room[roomNum].addPlayer(name, clientBr,
-									clientPw);
-							execut.execute(room[roomNum]);
-							System.out.println(sdf.format(new Date()) + name
-									+ "加入了第" + (roomNum + 1) + "桌游戏");
+							playerID = room[roomNum].addPlayer(name, clientBr, clientPw);
+							System.out.println(sdf.format(new Date()) + name + "加入了第" + (roomNum + 1) + "桌游戏");
 							break;
 						} else {
 							roomNum = 0;
-							while (room[roomNum].pNum != 0) {
+							while (room[roomNum].getpNum() != 0) {
 								roomNum++;
 							}
 							clientPw.println(roomNum);
-							playerID = room[roomNum].addPlayer(name, clientBr,
-									clientPw);
-							System.out.println(sdf.format(new Date()) + name
-									+ "加入了第" + (roomNum + 1) + "桌游戏");
+							playerID = room[roomNum].addPlayer(name, clientBr, clientPw);
+							System.out.println(sdf.format(new Date()) + name + "加入了第" + (roomNum + 1) + "桌游戏");
 							break;
 						}
 					}
@@ -148,43 +139,38 @@ public class GameServer {
 						boolean isReady = false;
 						while (!isReady) {
 							ready = clientBr.readLine();
-							System.out.println(sdf.format(new Date())
-									+ "ready=" + ready);
+							System.out.println(sdf.format(new Date()) + "ready=" + ready);
 							// 如果用户在此时退出则退出准备循环
 							if (ready.equals("EXIT")) {
 								room[roomNum].playerLeave(playerID);
 								playerID = -1;
 								clientPw.println("EXIT");
-								System.out.println(sdf.format(new Date())
-										+ name + "退出了" + "第" + (roomNum + 1)
-										+ "桌");
+								System.out.println(sdf.format(new Date()) + name + "退出了" + "第" + (roomNum + 1) + "桌");
 								break;
 							}
-							System.out.println(sdf.format(new Date()) + "第"
-									+ (roomNum + 1) + "桌的" + name + "准备了!");
+							System.out.println(sdf.format(new Date()) + "第" + (roomNum + 1) + "桌的" + name + "准备了!");
 
 							room[roomNum].ready(playerID);
 							isReady = true;
 							// 实时监听当前房间的准备人数和当前玩家的准备状态
-							System.out.println(sdf.format(new Date())
-									+ room[roomNum].ready);
-							while (room[roomNum].ready < 3) {
+							while (room[roomNum].getReady() < 3) {
 								clientPw.println("ALIVE");
 								Thread.sleep(100);
 								// 如果发现客户端取消准备则退出准备状态监听循环
 								if (clientBr.readLine().equals("NOREADY")) {
 									isReady = false;
 									room[roomNum].cancelReady(playerID);
-									System.out.println(sdf.format(new Date())
-											+ "第" + (roomNum + 1) + "桌的" + name
-											+ "取消准备了!");
+									System.out.println(
+											sdf.format(new Date()) + "第" + (roomNum + 1) + "桌的" + name + "取消准备了!");
 									break;
 								}
 							}
 						}
+
 						// 全部已准备,开始游戏 该循环为游戏循环,从发牌到游戏结束
 						if (playerID != -1) {
 							clientPw.println("START"); // 发送开始信号
+
 							while (true) {
 								// 发牌
 								clientPw.println("GIVECARDS"); // 发送发牌信号,客户端开始接收卡牌
@@ -200,7 +186,7 @@ public class GameServer {
 								// 等待三个玩家接受完全部的手牌
 								clientBr.readLine();
 								room[roomNum].over();
-								while (room[roomNum].over < 3) {
+								while (room[roomNum].getOver() < 3) {
 									Thread.sleep(200);
 								}
 
@@ -209,38 +195,41 @@ public class GameServer {
 								// 等待三位玩家接受完全部的地主牌并且显示完毕后再开始抢地主环节
 								clientBr.readLine();
 								room[roomNum].over();
-								while (room[roomNum].over < 6) {
+								while (room[roomNum].getOver() < 6) {
 									Thread.sleep(200);
 								}
 								// 将下一轮的牌洗好
 								room[roomNum].newTotal();
 								// 随机一个人开始叫地主
-								if (room[roomNum].robLord++ == 0) {// 判断其中是否有线程已进入
-									toDoId = (int) (Math.random() * 3);
-									toDoId = room[roomNum].robLord(toDoId);
-									if (toDoId == -1) {
-										room[roomNum].ready = 0;
-										room[roomNum].putCards = false;
-										room[roomNum].over = 0;
-										room[roomNum].robLord = -1;
-										continue;
-									}
-									room[roomNum].putCards(toDoId);
-									break;
-								} else {// 未进入的线程等待游戏结束
-									while (room[roomNum].putCards) {
-										Thread.sleep(500);
-									}
-									if (room[roomNum].robLord == -1) {
-										room[roomNum].over = 0;
-										room[roomNum].ready = 0;
-										Thread.sleep(550);
-										room[roomNum].robLord = 0;
-										room[roomNum].putCards = true;
-										continue;
-									} else {
+								synchronized (room[roomNum]) {
+									if (room[roomNum].getRobLord() == 0) {// 判断其中是否有线程已进入
+										room[roomNum].setRobLord(room[roomNum].getRobLord() + 1);
+										toDoId = (int) (Math.random() * 3);
+										toDoId = room[roomNum].robLord(toDoId);
+										if (toDoId == -1) {
+											room[roomNum].setReady(0);
+											room[roomNum].setPutCards(false);
+											room[roomNum].setOver(0);
+											room[roomNum].setRobLord(-1);
+											continue;
+										}
+										room[roomNum].putCards(toDoId);
 										break;
 									}
+								}
+								// 未进入的线程等待游戏结束
+								while (room[roomNum].isPutCards()) {
+									Thread.sleep(500);
+								}
+								if (room[roomNum].getRobLord() == -1) {
+									room[roomNum].setOver(0);
+									room[roomNum].setReady(0);
+									Thread.sleep(550);
+									room[roomNum].setRobLord(0);
+									room[roomNum].setPutCards(true);
+									continue;
+								} else {
+									break;
 								}
 							}
 						}
@@ -249,41 +238,35 @@ public class GameServer {
 							break;
 						} else {
 							Thread.sleep(600);
-							room[roomNum].ready = 0;
-							room[roomNum].over = 0;
-							room[roomNum].robLord = 0;
-							room[roomNum].putCards = true;
-							System.out.println(sdf.format(new Date()) + "第"
-									+ roomNum + "桌的游戏结束了!");
+							room[roomNum].setOver(0);
+							room[roomNum].setReady(0);
+							room[roomNum].setRobLord(0);
+							room[roomNum].setPutCards(true);
+							System.out.println(sdf.format(new Date()) + "第" + roomNum + "桌的游戏结束了!");
 							tmpMsg = clientBr.readLine();
 							if (tmpMsg.equals("CONTINUE")) {
-								System.out.println(sdf.format(new Date())
-										+ playerID + "继续游戏!");
+								System.out.println(sdf.format(new Date()) + playerID + "继续游戏!");
 								continue;
 							} else {
 								clientPw.println("EXIT");
 								room[roomNum].playerLeave(playerID);
-								System.out.println(sdf.format(new Date())
-										+ name + "退出了" + "第" + roomNum + "桌");
+								System.out.println(sdf.format(new Date()) + name + "退出了" + "第" + roomNum + "桌");
 								break;
 							}
 						}
 					}
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
 			} catch (Exception e) {
-				e.printStackTrace();
 			} finally {
 				System.out.println(sdf.format(new Date()) + "一台客户端下线了!");
 				nameList.remove(name);
 				if (playerID != -1) {
 					room[roomNum].playerLeave(playerID);
 				}
-				if(room[roomNum].clear()){
-					room[roomNum]=new Room();
+				if (room[roomNum].clear()) {
+					room[roomNum] = new Room();
 				}
 				try {
 					if (clientSocket != null) {

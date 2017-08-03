@@ -9,14 +9,14 @@ import java.awt.image.BufferedImage;
  * @author String
  *
  */
-public class TimerTik extends Thread{
+public class TimerTik implements Runnable{
 	BufferedImage image;
 	boolean flag=true;
 	private int max = 0;
 	int x, y;
 	int width = 50;
-	Graphics2D g2;
-	Font f =new Font(null, Font.BOLD, 25);
+	private Graphics2D g2;
+	private Font f =new Font(null, Font.BOLD, 25);
 
 	public void setMax(int max){
 		this.max=max;
@@ -51,7 +51,6 @@ public class TimerTik extends Thread{
 				g2.drawString(String.valueOf(max/10)+"S", 35, 60);
 			}
 		}
-		System.out.println("Tik is over!");
 		if (max<0){
 			GameClient.autoPass();
 		}

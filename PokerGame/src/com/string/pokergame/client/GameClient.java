@@ -8,6 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,7 +16,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
@@ -34,12 +37,13 @@ import javax.swing.WindowConstants;
  * 
  */
 public class GameClient extends JPanel {
+	private static final long serialVersionUID = 1L;
+
 	public static final int WIDTH = 800;
 	public static final int HEIGHT = 500;
 	public static int width = 70, height = 100;
-	public static final int SHOW_TIME=30;
-	public static final int ROB_TIME=15;
-	private static final long serialVersionUID = 1L;
+	public static final int SHOW_TIME = 30;
+	public static final int ROB_TIME = 15;
 
 	public static final int START = 0;
 	public static final int WAIT = 1;
@@ -61,7 +65,7 @@ public class GameClient extends JPanel {
 	public static BufferedImage button1;
 	public static BufferedImage button2;
 	public static BufferedImage show;
-	public static BufferedImage putDown;
+	public static BufferedImage tip;
 	public static BufferedImage wait;
 	public static BufferedImage join;
 	public static BufferedImage create;
@@ -80,6 +84,7 @@ public class GameClient extends JPanel {
 	public static BufferedImage leave;
 	public static BufferedImage tips1;
 	public static BufferedImage tips2;
+	public static BufferedImage tips3;
 	public static BufferedImage auto;
 	public static BufferedImage cancelAuto;
 	public static BufferedImage noteCard;
@@ -87,42 +92,43 @@ public class GameClient extends JPanel {
 	public static int state = START;
 	public static boolean toDo = false, toRob = false, isLord = false;
 	public static boolean isPass = false, isWin = false, key = false;
-	public static int isRob = 0, times = 0, tips = 0;
-	public static int score = 0, point = 0;
+	public static int isRob = 0, times = 0, errTips = 0;
+	public static int score = 0, point = 0, tipsId = 0;
 	public static boolean robIsOver = false, showPass = false, toPass = false;
 	static { // 加载背景图和文字图片资源
 		try {
-			noteCard = ImageIO.read(GameClient.class.getResource("image/jipaiqi.png"));
-			auto = ImageIO.read(GameClient.class.getResource("image/tuoguan.png"));
-			cancelAuto = ImageIO.read(GameClient.class.getResource("image/qxtg.png"));
-			noReady = ImageIO.read(GameClient.class.getResource("image/cancelReady.png"));
-			tips1 = ImageIO.read(GameClient.class.getResource("image/pxx.png"));
-			tips2 = ImageIO.read(GameClient.class.getResource("image/pxcw.png"));
-			leave = ImageIO.read(GameClient.class.getResource("image/lixian.png"));
-			goOn = ImageIO.read(GameClient.class.getResource("image/jixu.png"));
-			lordCard = ImageIO.read(GameClient.class.getResource("image/dzp.png"));
-			timer = ImageIO.read(GameClient.class.getResource("image/naozhong.png"));
-			noRob = ImageIO.read(GameClient.class.getResource("image/bq.png"));
-			rob = ImageIO.read(GameClient.class.getResource("image/qdz.png"));
-			pass = ImageIO.read(GameClient.class.getResource("image/bc.png"));
-			cardBack = ImageIO.read(GameClient.class.getResource("image/paishu.png"));
-			exit = ImageIO.read(GameClient.class.getResource("image/likai.png"));
-			readyP = ImageIO.read(GameClient.class.getResource("image/zb.png"));
-			join = ImageIO.read(GameClient.class.getResource("image/jrfj.png"));
-			create = ImageIO.read(GameClient.class.getResource("image/cjfj.png"));
-			wait = ImageIO.read(GameClient.class.getResource("image/wait.jpg"));
-			putDown = ImageIO.read(GameClient.class.getResource("image/cancel.png"));
-			show = ImageIO.read(GameClient.class.getResource("image/showCards.png"));
-			start = ImageIO.read(GameClient.class.getResource("image/ksyx.png"));
-			button1 = ImageIO.read(GameClient.class.getResource("image/g.png"));
-			button2 = ImageIO.read(GameClient.class.getResource("image/g2.png"));
-			login = ImageIO.read(GameClient.class.getResource("image/login.jpg"));
-			title = ImageIO.read(GameClient.class.getResource("image/nmddz.png"));
-			background = ImageIO.read(GameClient.class.getResource("image/background.jpg"));
-			farmer = ImageIO.read(GameClient.class.getResource("image/farmer.png"));
-			lord = ImageIO.read(GameClient.class.getResource("image/lord.png"));
+			noteCard = ImageIO.read(GameClient.class.getResource("image"+File.separator+"jipaiqi.png"));
+			auto = ImageIO.read(GameClient.class.getResource("image"+File.separator+"tuoguan.png"));
+			cancelAuto = ImageIO.read(GameClient.class.getResource("image"+File.separator+"qxtg.png"));
+			noReady = ImageIO.read(GameClient.class.getResource("image"+File.separator+"cancelReady.png"));
+			tips1 = ImageIO.read(GameClient.class.getResource("image"+File.separator+"pxx.png"));
+			tips2 = ImageIO.read(GameClient.class.getResource("image"+File.separator+"pxcw.png"));
+			tips3 = ImageIO.read(GameClient.class.getResource("image"+File.separator+"mdp.png"));
+			leave = ImageIO.read(GameClient.class.getResource("image"+File.separator+"lixian.png"));
+			goOn = ImageIO.read(GameClient.class.getResource("image"+File.separator+"jixu.png"));
+			lordCard = ImageIO.read(GameClient.class.getResource("image"+File.separator+"dzp.png"));
+			timer = ImageIO.read(GameClient.class.getResource("image"+File.separator+"naozhong.png"));
+			noRob = ImageIO.read(GameClient.class.getResource("image"+File.separator+"bq.png"));
+			rob = ImageIO.read(GameClient.class.getResource("image"+File.separator+"qdz.png"));
+			pass = ImageIO.read(GameClient.class.getResource("image"+File.separator+"bc.png"));
+			cardBack = ImageIO.read(GameClient.class.getResource("image"+File.separator+"paishu.png"));
+			exit = ImageIO.read(GameClient.class.getResource("image"+File.separator+"likai.png"));
+			readyP = ImageIO.read(GameClient.class.getResource("image"+File.separator+"zb.png"));
+			join = ImageIO.read(GameClient.class.getResource("image"+File.separator+"jrfj.png"));
+			create = ImageIO.read(GameClient.class.getResource("image"+File.separator+"cjfj.png"));
+			wait = ImageIO.read(GameClient.class.getResource("image"+File.separator+"wait.jpg"));
+			tip = ImageIO.read(GameClient.class.getResource("image"+File.separator+"tishi.png"));
+			show = ImageIO.read(GameClient.class.getResource("image"+File.separator+"showCards.png"));
+			start = ImageIO.read(GameClient.class.getResource("image"+File.separator+"ksyx.png"));
+			button1 = ImageIO.read(GameClient.class.getResource("image"+File.separator+"g.png"));
+			button2 = ImageIO.read(GameClient.class.getResource("image"+File.separator+"g2.png"));
+			login = ImageIO.read(GameClient.class.getResource("image"+File.separator+"login.jpg"));
+			title = ImageIO.read(GameClient.class.getResource("image"+File.separator+"nmddz.png"));
+			background = ImageIO.read(GameClient.class.getResource("image"+File.separator+"background.jpg"));
+			farmer = ImageIO.read(GameClient.class.getResource("image"+File.separator+"farmer.png"));
+			lord = ImageIO.read(GameClient.class.getResource("image"+File.separator+"lord.png"));
 			for (int i = 0; i < 54; i++) {
-				card[i] = ImageIO.read(GameClient.class.getResource("image/" + (i + 1) + ".jpg"));
+				card[i] = ImageIO.read(GameClient.class.getResource("image"+File.separator+ (i + 1) + ".jpg"));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -134,6 +140,7 @@ public class GameClient extends JPanel {
 	public static Card[] myCards = new Card[0];
 	public static Card[] showCards = new Card[0];
 	public static int[] noteCards = new int[20];
+	public static int[] tipsIndex = new int[0];
 	public static Button startB, showB, putDownB, joinB, createB, exitB, readyB, passB;
 	public static Button robB, noRobB, noReadyB, goOnB, exitRoomB;
 	public static Button autoB, cancelAutoB;
@@ -150,6 +157,7 @@ public class GameClient extends JPanel {
 	public String name, tmpMsg;
 	public static JFrame frame;
 	public static Font f;
+	public static List<int[]> tips = new ArrayList<int[]>();
 	/**
 	 * 左边的玩家对象
 	 */
@@ -388,6 +396,11 @@ public class GameClient extends JPanel {
 			showCards[i].y = y;
 		}
 		timeTik3.flag = false;
+		nowCardType = 0;
+		nowCards = null;
+		nowLen = 0;
+		errTips = 0;
+		toDo = false;
 	}
 
 	/**
@@ -723,6 +736,69 @@ public class GameClient extends JPanel {
 		return t;
 	}
 
+	/**
+	 * 递归方法找出大于上家的牌
+	 * 
+	 * @param index
+	 *            当前的tipsIndex的下标
+	 * @param myIndex
+	 *            当前的myCards的下标
+	 */
+	public static void findTips(int index, int myIndex) {
+		Card[] tip = new Card[0];
+		int cardType;
+		if (index > myCards.length || myIndex > myCards.length) {
+			return;
+		}
+		if (nowLen == 0) {
+			return;
+		}
+		if (nowLen >= 4 && index > nowLen) {
+			return;
+		}
+		if (nowLen < 4 && index > 4) {
+			return;
+		}
+		if (nowCards == null || nowCards.length == 0) {
+			return;
+		}
+		for (int i = myCards.length - 1; i >= myIndex; i--) {
+			tipsIndex = Arrays.copyOf(tipsIndex, index + 1);
+			tipsIndex[index] = i;
+			tip = new Card[0];
+			for (int j = 0; j < tipsIndex.length; j++) {
+				tip = Arrays.copyOf(tip, tip.length + 1);
+				tip[tip.length - 1] = new Card();
+				tip[tip.length - 1].num = myCards[tipsIndex[j]].num;
+			}
+			cardType = checkCards(tip);
+			if (cardType == nowCardType && tip.length == nowLen && tip[0].num > nowCards[0].num) {
+				tips.add(tipsIndex);
+			} else if ((cardType == BOMB && nowCardType != BOMB && nowCardType != KINGBOMB) || cardType == KINGBOMB) {
+				tips.add(tipsIndex);
+			}
+			findTips(index + 1, i + 1);
+		}
+	}
+
+	/**
+	 * 在集合中循环遍历每个提示,将提示的牌的y坐标-20.
+	 */
+	public static void showTips() {
+		if (tipsId > tips.size() - 1) {
+			tipsId = 0;
+		}
+		clearChoose();
+		if (tips.size() == 0) {
+			return;
+		}
+		int[] arr = tips.get(tipsId);
+		for (int i = 0; i < arr.length; i++) {
+			myCards[arr[i]].y -= 20;
+		}
+		tipsId++;
+	}
+
 	public synchronized static void autoPass() {
 		if (toDo && showPass) {
 			serverPrinter.println("PASS");
@@ -731,7 +807,7 @@ public class GameClient extends JPanel {
 			toDo = false;
 			isPass = true;
 			timeTik3.flag = false;
-			tips = 0;
+			errTips = 0;
 			clearChoose();
 		} else if (toRob) {
 			serverPrinter.println("N");
@@ -748,14 +824,9 @@ public class GameClient extends JPanel {
 				cardType = 0;
 			}
 			putMyCards();
-			nowCardType = 0;
-			nowCards = null;
-			nowLen = 0;
-			tips = 0;
-			toDo = false;
 		}
 	}
-
+	
 	public static void score() {
 		if (pl.isWin) {
 			if (isLord) {
@@ -819,7 +890,7 @@ public class GameClient extends JPanel {
 	}
 
 	public void paintButton(Button butt, Graphics g) {
-		g.drawImage(butt.image, butt.x, butt.y, butt.width, butt.height, null);
+		g.drawImage(butt.image, butt.getX(), butt.getY(), butt.getWidth(), butt.getHeight(), null);
 	}
 
 	public void paintCards(Graphics g) {
@@ -872,15 +943,18 @@ public class GameClient extends JPanel {
 		} // 游戏大厅状态的画面打印
 		else if (state == SELECT_ROOM) {
 			paintButton(joinB, g);
-			g.drawImage(join, joinB.x + 25, joinB.y + 20, joinB.width - 50, joinB.height - 50, null);
+			g.drawImage(join, joinB.getX() + 25, joinB.getY() + 20, joinB.getWidth() - 50, joinB.getHeight() - 50,
+					null);
 			paintButton(createB, g);
-			g.drawImage(create, createB.x + 25, createB.y + 20, createB.width - 50, createB.height - 50, null);
+			g.drawImage(create, createB.getX() + 25, createB.getY() + 20, createB.getWidth() - 50,
+					createB.getHeight() - 50, null);
 		} // 房间内的画面打印
 		else if (state == IN_ROOM) {
 			paintButton(exitB, g);
-			g.drawImage(exit, exitB.x, exitB.y, exitB.width, exitB.height, null);
+			g.drawImage(exit, exitB.getX(), exitB.getY(), exitB.getWidth(), exitB.getHeight(), null);
 			paintButton(readyB, g);
-			g.drawImage(start, readyB.x + 10, readyB.y + 8, readyB.width - 20, readyB.height - 20, null);
+			g.drawImage(start, readyB.getX() + 10, readyB.getY() + 8, readyB.getWidth() - 20, readyB.getHeight() - 20,
+					null);
 			g.setFont(f);
 			if (pl != null) {
 				g.drawString(pl.name, 30, 120);
@@ -913,7 +987,7 @@ public class GameClient extends JPanel {
 			}
 			g.drawString(name, 150, 450);
 			paintButton(noReadyB, g);
-			g.drawImage(noReady, noReadyB.x, noReadyB.y, noReadyB.width, noReadyB.height, null);
+			g.drawImage(noReady, noReadyB.getX(), noReadyB.getY(), noReadyB.getWidth(), noReadyB.getHeight(), null);
 		} // 游戏状态打印
 		else if (state == GAME) {
 			if (pl != null) {
@@ -991,36 +1065,45 @@ public class GameClient extends JPanel {
 				g.drawImage(farmer, 150, 350, 100, 100, null);
 			}
 			if (toPass) {
-				g.drawImage(cancelAutoB.image, cancelAutoB.x, cancelAutoB.y, cancelAutoB.width, cancelAutoB.height,
-						null);
-				g.drawImage(cancelAuto, cancelAutoB.x + 10, cancelAutoB.y + 5, cancelAutoB.width - 20,
-						cancelAutoB.height - 20, null);
+				g.drawImage(cancelAutoB.image, cancelAutoB.getX(), cancelAutoB.getY(), cancelAutoB.getWidth(),
+						cancelAutoB.getHeight(), null);
+				g.drawImage(cancelAuto, cancelAutoB.getX() + 10, cancelAutoB.getY() + 5, cancelAutoB.getWidth() - 20,
+						cancelAutoB.getHeight() - 20, null);
 			}
 			if (toRob) {
-				g.drawImage(autoB.image, autoB.x, autoB.y, autoB.width, autoB.height, null);
-				g.drawImage(auto, autoB.x + 5, autoB.y + 3, autoB.width - 10, autoB.height - 10, null);
+				g.drawImage(autoB.image, autoB.getX(), autoB.getY(), autoB.getWidth(), autoB.getHeight(), null);
+				g.drawImage(auto, autoB.getX() + 5, autoB.getY() + 3, autoB.getWidth() - 10, autoB.getHeight() - 10,
+						null);
 				g.drawImage(timer, 375, 250, 50, 50, null);
-				g.drawImage(robB.image, robB.x, robB.y, robB.width, robB.height, null);
-				g.drawImage(rob, robB.x + 5, robB.y + 3, robB.width - 10, robB.height - 10, null);
-				g.drawImage(noRobB.image, noRobB.x, noRobB.y, noRobB.width, noRobB.height, null);
-				g.drawImage(noRob, noRobB.x + 5, noRobB.y + 3, noRobB.width - 10, noRobB.height - 10, null);
+				g.drawImage(robB.image, robB.getX(), robB.getY(), robB.getWidth(), robB.getHeight(), null);
+				g.drawImage(rob, robB.getX() + 5, robB.getY() + 3, robB.getWidth() - 10, robB.getHeight() - 10, null);
+				g.drawImage(noRobB.image, noRobB.getX(), noRobB.getY(), noRobB.getWidth(), noRobB.getHeight(), null);
+				g.drawImage(noRob, noRobB.getX() + 5, noRobB.getY() + 3, noRobB.getWidth() - 10,
+						noRobB.getHeight() - 10, null);
 			}
 			if (toDo) {
-				g.drawImage(autoB.image, autoB.x, autoB.y, autoB.width, autoB.height, null);
-				g.drawImage(auto, autoB.x + 5, autoB.y + 3, autoB.width - 10, autoB.height - 10, null);
+				g.drawImage(autoB.image, autoB.getX(), autoB.getY(), autoB.getWidth(), autoB.getHeight(), null);
+				g.drawImage(auto, autoB.getX() + 5, autoB.getY() + 3, autoB.getWidth() - 10, autoB.getHeight() - 10,
+						null);
 				g.drawImage(timeTik3.image, timeTik3.x, timeTik3.y, 50, 50, null);
-				g.drawImage(showB.image, showB.x, showB.y, showB.width, showB.height, null);
-				g.drawImage(show, showB.x + 5, showB.y + 3, showB.width - 10, showB.height - 10, null);
+				g.drawImage(showB.image, showB.getX(), showB.getY(), showB.getWidth(), showB.getHeight(), null);
+				g.drawImage(show, showB.getX() + 5, showB.getY() + 3, showB.getWidth() - 10, showB.getHeight() - 10,
+						null);
 				if (showPass) {
-					g.drawImage(passB.image, passB.x, passB.y, passB.width, passB.height, null);
-					g.drawImage(pass, passB.x + 5, passB.y + 3, passB.width - 10, passB.height - 10, null);
+					g.drawImage(passB.image, passB.getX(), passB.getY(), passB.getWidth(), passB.getHeight(), null);
+					g.drawImage(pass, passB.getX() + 5, passB.getY() + 3, passB.getWidth() - 10, passB.getHeight() - 10,
+							null);
 				}
-				g.drawImage(putDownB.image, putDownB.x, putDownB.y, putDownB.width, putDownB.height, null);
-				g.drawImage(putDown, putDownB.x + 5, putDownB.y + 3, putDownB.width - 10, putDownB.height - 10, null);
-				if (tips == 1) {
+				g.drawImage(putDownB.image, putDownB.getX(), putDownB.getY(), putDownB.getWidth(), putDownB.getHeight(),
+						null);
+				g.drawImage(tip, putDownB.getX() + 5, putDownB.getY() + 3, putDownB.getWidth() - 10,
+						putDownB.getHeight() - 10, null);
+				if (errTips == 1) {
 					g.drawImage(tips1, 200, 175, null);
-				} else if (tips == 2) {
+				} else if (errTips == 2) {
 					g.drawImage(tips2, 200, 175, null);
+				} else if (errTips == 3) {
+					g.drawImage(tips3, 200, 175, null);
 				}
 			}
 			f = new Font(null, 0, 10);
@@ -1074,10 +1157,11 @@ public class GameClient extends JPanel {
 				g.setFont(f);
 				g.drawString("Your WIN!", 350, 225);
 			}
-			g.drawImage(goOnB.image, goOnB.x, goOnB.y, goOnB.width, goOnB.height, null);
-			g.drawImage(goOn, goOnB.x, goOnB.y, goOnB.width, goOnB.height, null);
-			g.drawImage(exitRoomB.image, exitRoomB.x, exitRoomB.y, exitRoomB.width, exitRoomB.height, null);
-			g.drawImage(exit, exitRoomB.x, exitRoomB.y, exitRoomB.width, exitRoomB.height, null);
+			g.drawImage(goOnB.image, goOnB.getX(), goOnB.getY(), goOnB.getWidth(), goOnB.getHeight(), null);
+			g.drawImage(goOn, goOnB.getX(), goOnB.getY(), goOnB.getWidth(), goOnB.getHeight(), null);
+			g.drawImage(exitRoomB.image, exitRoomB.getX(), exitRoomB.getY(), exitRoomB.getWidth(),
+					exitRoomB.getHeight(), null);
+			g.drawImage(exit, exitRoomB.getX(), exitRoomB.getY(), exitRoomB.getWidth(), exitRoomB.getHeight(), null);
 		}
 	}
 
@@ -1163,8 +1247,7 @@ public class GameClient extends JPanel {
 				}
 
 				// 开始游戏按钮
-				if (state == START && e.getX() > 550 && e.getX() < 550 + button1.getWidth() && e.getY() > 350
-						&& e.getY() < 350 + button1.getHeight()) {
+				if (buttonFlash(e, state == START, startB)) {
 					try {
 						String ip = JOptionPane.showInputDialog("请输入服务器的IP地址(直接点击确定则以默认IP:176.24.3.33连接):");
 						if (ip != null && ip.equals("")) {
@@ -1174,11 +1257,11 @@ public class GameClient extends JPanel {
 							s = new Socket(ip, 3000);
 							// 创建服务器输出流
 							serverOut = s.getOutputStream();
-							serverOutWriter = new OutputStreamWriter(serverOut,"utf-8");
+							serverOutWriter = new OutputStreamWriter(serverOut, "utf-8");
 							serverPrinter = new PrintWriter(serverOutWriter, true);
 							// 创建服务器输入流
 							serverInput = s.getInputStream();
-							serverInputReader = new InputStreamReader(serverInput,"utf-8");
+							serverInputReader = new InputStreamReader(serverInput, "utf-8");
 							serverReader = new BufferedReader(serverInputReader);
 							// 从用户处输入客户端名字
 							name = JOptionPane.showInputDialog("服务器连接成功!请输入你的游戏昵称:");
@@ -1191,7 +1274,7 @@ public class GameClient extends JPanel {
 							}
 							frame.setTitle("局域网斗地主:" + name);
 							state = SELECT_ROOM;
-							//开启服务器监听线程
+							// 开启服务器监听线程
 							gameHandler.start();
 
 						}
@@ -1250,7 +1333,7 @@ public class GameClient extends JPanel {
 						} else {
 							myCards[i].y += 20;
 						}
-						tips = 0;
+						errTips = 0;
 
 						break;
 					}
@@ -1264,12 +1347,11 @@ public class GameClient extends JPanel {
 					} else {
 						myCards[myCards.length - 1].y += 20;
 					}
-					tips = 0;
+					errTips = 0;
 
 				}
 				// 出牌按钮
-				if (toDo && e.getX() > showB.x && e.getY() > showB.y && e.getX() < showB.x + showB.width
-						&& e.getY() < showB.y + showB.height) {
+				if (buttonFlash(e, state == GAME && toDo, showB)) {
 					chooseCard();
 					if (showCards.length != 0) {
 						cardType = checkCards(showCards);
@@ -1280,46 +1362,37 @@ public class GameClient extends JPanel {
 					if (cardType != 0) {
 						if (!showPass) {
 							putMyCards();
-							nowCardType = 0;
-							nowCards = null;
-							nowLen = 0;
-							tips = 0;
-							toDo = false;
 						} else if (cardType == nowCardType && showCards.length == nowLen
 								&& showCards[0].num > nowCards[0].num) {
 							putMyCards();
-							nowCardType = 0;
-							nowCards = null;
 							if (cardType == BOMB || cardType == KINGBOMB) {
 								point *= 2;
 							}
-							nowLen = 0;
-							tips = 0;
-							toDo = false;
 						} else if ((cardType == BOMB && nowCardType != BOMB && nowCardType != KINGBOMB)
 								|| cardType == KINGBOMB) {
 							putMyCards();
-							nowCardType = 0;
-							nowCards = null;
 							point *= 2;
-							nowLen = 0;
-							tips = 0;
-							toDo = false;
 						} else {
 							showCards = new Card[0];
-							tips = 1;
+							errTips = 1;
 						}
 					} else if (cardType == 0 && showCards.length != 0) {
 						showCards = new Card[0];
-						tips = 2;
+						errTips = 2;
 					}
 				}
+
 				// 放下按钮
-				if (toDo && e.getX() > putDownB.x && e.getY() > putDownB.y && e.getX() < putDownB.x + putDownB.width
-						&& e.getY() < putDownB.y + putDownB.height) {
-					clearChoose();
-					tips = 0;
+				if (buttonFlash(e, state == GAME && toDo, putDownB)) {
+					if (tips.size() == 0) {
+						clearChoose();
+						errTips = 3;
+					} else {
+						showTips();
+						errTips = 0;
+					}
 				}
+
 				// 不出按钮
 				if (buttonFlash(e, state == GAME && toDo && showPass, passB)) {
 					autoPass();
@@ -1360,13 +1433,14 @@ public class GameClient extends JPanel {
 			 */
 			public boolean buttonFlash(MouseEvent e, boolean flag, Button b) {
 				boolean c = false;
-				if (flag && e.getX() > b.x && e.getY() > b.y && e.getX() < b.x + b.width && e.getY() < b.y + b.height) {
+				if (flag && e.getX() > b.getX() && e.getY() > b.getY() && e.getX() < b.getX() + b.getWidth()
+						&& e.getY() < b.getY() + b.getHeight()) {
 					b.image = button2;
-					repaint(b.x, b.y, b.width, b.height);
+					repaint(b.getX(), b.getY(), b.getWidth(), b.getHeight());
 					c = true;
 				} else if (flag) {
 					b.image = button1;
-					repaint(b.x, b.y, b.width, b.height);
+					repaint(b.getX(), b.getY(), b.getWidth(), b.getHeight());
 				}
 				return c;
 			}
@@ -1377,8 +1451,6 @@ public class GameClient extends JPanel {
 				buttonFlash(e, state == START, startB);
 				buttonFlash(e, state == SELECT_ROOM, joinB);
 				buttonFlash(e, state == SELECT_ROOM, createB);
-				buttonFlash(e, toDo, showB);
-				buttonFlash(e, toDo, putDownB);
 				buttonFlash(e, state == IN_ROOM, exitB);
 				buttonFlash(e, state == IN_ROOM, readyB);
 				buttonFlash(e, state == GAME && toRob, robB);
@@ -1402,7 +1474,7 @@ public class GameClient extends JPanel {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_K) {
-					key = key?false:true;
+					key = key ? false : true;
 				}
 			}
 		};
@@ -1572,12 +1644,13 @@ public class GameClient extends JPanel {
 								pr.cardsNum += 3;
 							}
 							robIsOver = true;
-
 						}
 						// 接收谁在出牌的信号
 						if (tmpMsg.equals("WHODO")) {
 							int id = Integer.valueOf(serverReader.readLine());
 							if (id == myId) {
+								tips.clear();
+								findTips(0, 0);
 								if (!toPass) {
 									if (pl.isPass && pr.isPass) {
 										pl.isPass = false;
